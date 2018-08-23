@@ -24,7 +24,7 @@ EXTERN_DLL_EXPORT void VoidFunc()
 	int loggerPort;
 
 	/*CONFIG_START */
-	loggerIp = "";
+	loggerIp = "1.1.1.1";
 	loggerPort = 6667;
 	/*CONFIG_END*/
 
