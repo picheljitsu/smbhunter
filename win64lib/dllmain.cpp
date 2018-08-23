@@ -6,31 +6,38 @@
 #include <vector>
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
+#include <algorithm>
 #include "wmiEvhead.h"
 #include "thread"
-#include <algorithm>
 #include "tcpclient.h"
 #include "stdafx.h"
 
 //__declspec(dllexport) DWORD WINAPI runfunc(LPVOID lpParam)
 EXTERN_DLL_EXPORT void VoidFunc()
 {
+
 	std::string hashlist;
 	std::string buff_string;
 	std::string output;
 	std::vector<std::string> hashlog;
+	char *loggerIp;
+	int loggerPort;
 
+	/*CONFIG_START */
+	loggerIp = "172.17.120.30";
+	loggerPort = 6667;
+	/*CONFIG_END*/
+
+	char *pLoggerIp = loggerIp;
 	int sendFail = 0;
 	int res = NULL;
 	IWbemServices *pSvc = wmiSetup();
 
 	while (true)
 	{
-
 		output = getOutput(pSvc);
 		std::this_thread::sleep_for(2s);
 
-		//If output isn't empty
 		if (output != "")
 		{
 			std::string outputHash = makehash(output);
@@ -52,7 +59,7 @@ EXTERN_DLL_EXPORT void VoidFunc()
 			if (sendFail == 1 || hashcheck == false)
 			{
 				bool conn;
-				conn = (ConnectToHost(6777, "172.17.120.30"));
+				conn = (ConnectToHost(loggerPort, loggerIp));
 				//Set up connection
 				if (conn == false)
 				{
