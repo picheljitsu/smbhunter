@@ -40,8 +40,8 @@ function Invoke-Controller{
           Get-Content "$ConfigFile\ASCII_ART.txt" -ErrorAction SilentlyContinue }
     catch { write-host "[-] ASCII art not found :(" -foregroundcolor Red }
 
-    try { netsh advfirewall firewall delete rule name="ctoc $port" | Out-Null
-          netsh advfirewall firewall add rule name="ctoc $port" dir=in action=allow protocol=TCP localport=$port | Out-Null
+    try { netsh advfirewall firewall delete rule name="controller $port" | Out-Null
+          netsh advfirewall firewall add rule name="controller $port" dir=in action=allow protocol=TCP localport=$port | Out-Null
           write-host "[+] Port $port opened in firewall..."
           }
     catch { write-host "[!] Warning. Unable to establish a firewall rule.  Hosts may not be able to connect." }
