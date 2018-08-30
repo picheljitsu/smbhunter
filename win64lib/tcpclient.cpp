@@ -1,6 +1,3 @@
-//CONNECT TO REMOTE HOST (CLIENT APPLICATION)
-//Include the needed header files.
-//Don't forget to link libws2_32.a to your program as well
 #include <winsock.h>
 #include <iostream>
 #include "thread"
@@ -13,22 +10,19 @@
 
 using namespace std;
 
-SOCKET s; //Socket handle
+SOCKET s;
 
-
-		  //CONNECTTOHOST – Connects to a remote host
 bool ConnectToHost(int PortNo, char* IPAddress)
 {
-	//Start up Winsock…
+
 	WSADATA wsadata;
 	
 	int error = WSAStartup(0x0202, &wsadata);
 
-	//Did something happen?
 	if (error)
 		return false;
 
-	//Did we get the right Winsock version?
+	//check winsock ver
 	if (wsadata.wVersion != 0x0202)
 	{
 		WSACleanup(); //Clean up Winsock
@@ -92,9 +86,8 @@ int sendData(std::string sendbuf)
 		return 1;
 	}
 	
-
 	//Handle connection hangs
-	clock_t startTime = clock(); //Start timer
+	clock_t startTime = clock(); 
 	double secondsPassed;
 	double secondsToDelay = atof("10");
 

